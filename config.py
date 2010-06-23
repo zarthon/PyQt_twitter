@@ -1,3 +1,0 @@
-user=None
-password=None
-
