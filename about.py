@@ -14,6 +14,7 @@ class Ui_About(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(461, 290)
+	Dialog.setWindowIcon(QtGui.QIcon('icons/web48.png'))
         self.horizontalLayoutWidget = QtGui.QWidget(Dialog)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 461, 241))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
@@ -56,9 +57,3 @@ class Ui_About(object):
 	"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("Dialog", "OK", None, QtGui.QApplication.UnicodeUTF8))
 
-app = QtGui.QApplication(sys.argv)
-dialog = QtGui.QDialog()
-asd = Ui_Dialog()
-asd.setupUi(dialog)
-dialog.show()
-app.exec_()

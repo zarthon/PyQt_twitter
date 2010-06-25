@@ -6,9 +6,11 @@ from threading import Timer
 from PyQt4 import QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import urllib2
-
-
+import urllib2, urllib
+import os.path
+import shutil
+from whois import *
+from about import *
 
 USER = None
 PASSWORD = None
@@ -23,52 +25,8 @@ def Time_Action(QtWit):
     global Time
     Time = Timer(60.0,QtWit.showMessage)
     Time.start()
+    
 
-class Ui_About(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(461, 290)
-        self.horizontalLayoutWidget = QtGui.QWidget(Dialog)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 461, 241))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.label = QtGui.QLabel(self.horizontalLayoutWidget)
-        self.label.setObjectName("label")
-        self.horizontalLayout.addWidget(self.label)
-        self.label_2 = QtGui.QLabel(self.horizontalLayoutWidget)
-        self.label_2.setWordWrap(True)
-        self.label_2.setObjectName("label_2")
-        self.horizontalLayout.addWidget(self.label_2)
-        self.pushButton = QtGui.QPushButton(Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(170, 240, 111, 31))
-        self.pushButton.setObjectName("pushButton")
-
-        self.retranslateUi(Dialog)
-        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL("clicked()"), Dialog.close)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
-
-    def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n" "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-	"p, li { white-space: pre-wrap; }\n"
-	"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><img src=\"./icons/logo.png\" /></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-	"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-	"p, li { white-space: pre-wrap; }\n"
-	"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">QtWitter is simple Api for Twitter developed using twitter library for python by DeWitt Clinton</span></p>\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">(</span><a href=\"http://code.google.com/p/python-twitter/\"><span style=\" font-size:8pt; text-decoration: underline; color:#0057ae;\">http://code.google.com/p/python-twitter/</span></a><span style=\" font-size:8pt; font-weight:600;\">) </span></p>\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">and Qt bindings for Python</span></p>\n"
-	"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"></p>\n"
-	"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"></p>\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Version 1.0</span></p>\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">(C) Mohit Kothari</span></p>\n"
-	"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"http://www.git-hub.com/zarthon/PyQt_Twitter\"><span style=\" text-decoration: underline; color:#0057ae;\">Source Code</span></a></p>\n"
-	"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"></p>\n"
-	"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("Dialog", "OK", None, QtGui.QApplication.UnicodeUTF8))
 
 class Ui_Reply(object):
     def setupUi(self, Dialog):
@@ -101,6 +59,7 @@ class Ui_Reply(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.listWidget = QtGui.QListWidget(self.verticalLayoutWidget)
         self.listWidget.setObjectName("listWidget")
+        
         self.verticalLayout.addWidget(self.listWidget)
 
         self.retranslateUi(Dialog)
@@ -183,7 +142,6 @@ class Ui_Reply(object):
 	except urllib2.URLError as eror:
 	    error = QMessageBox.critical(self.Dialog,"Error",s)
 	    error.show()
-	    
 	Successful = QMessageBox(1,'Successful','Reply Successfully Posted')
 	Successful.show()  
 	Successful.exec_()
@@ -237,22 +195,25 @@ class Ui_Settings(object):
 
 
 class Ui_Qtwit(object):
-	
+    
 	def setupUi(self, Dialog):
 		Dialog.setObjectName("Dialog")
-		Dialog.resize(398, 584)
+		Dialog.resize(430, 584)
 		self.systemTray = QSystemTrayIcon(QtGui.QIcon('icons/web48.png'),None)
 		self.systemTray.setVisible(True)
 		Dialog.setWindowIcon(QtGui.QIcon('icons/web48.png'))
-
-		self.verticalLayoutWidget = QtGui.QWidget(Dialog)
-		self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 395, 581))
-		self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-		self.verticalLayout_2 = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+		
+		self.verticalLayout_3 = QtGui.QVBoxLayout(Dialog)
+		self.verticalLayout_3.setObjectName("verticalLayout_3")
+		
+		self.verticalLayout_2 = QtGui.QVBoxLayout()
+	        self.verticalLayout_2.setSpacing(-1)
+		self.verticalLayout_2.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
 		self.verticalLayout_2.setObjectName("verticalLayout_2")
+		
 		self.horizontalLayout_2 = QtGui.QHBoxLayout()
 		self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-		self.toolButton = QtGui.QToolButton(self.verticalLayoutWidget)
+		self.toolButton = QtGui.QToolButton(Dialog)
 		self.toolButton.setToolTip("Set UserName and Password")
 		icon = QtGui.QIcon()
 		icon.addPixmap(QtGui.QPixmap("icons/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -260,7 +221,7 @@ class Ui_Qtwit(object):
 		self.toolButton.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton.setObjectName("toolButton")
 		self.horizontalLayout_2.addWidget(self.toolButton)
-		self.toolButton_2 = QtGui.QToolButton(self.verticalLayoutWidget)
+		self.toolButton_2 = QtGui.QToolButton(Dialog)
 		self.toolButton_2.setToolTip("Post New Status")
 		icon1 = QtGui.QIcon()
 		icon1.addPixmap(QtGui.QPixmap("icons/new.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -268,7 +229,7 @@ class Ui_Qtwit(object):
 		self.toolButton_2.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_2.setObjectName("toolButton_2")
 		self.horizontalLayout_2.addWidget(self.toolButton_2)
-		self.toolButton_5 = QtGui.QToolButton(self.verticalLayoutWidget)
+		self.toolButton_5 = QtGui.QToolButton(Dialog)
 		self.toolButton_5.setToolTip("Get Friends Latest Updates")
 		icon2 = QtGui.QIcon()
 		icon2.addPixmap(QtGui.QPixmap("icons/get_mesg.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -278,7 +239,7 @@ class Ui_Qtwit(object):
 		self.horizontalLayout_2.addWidget(self.toolButton_5)
 		spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 		self.horizontalLayout_2.addItem(spacerItem)
-		self.toolButton_3 = QtGui.QToolButton(self.verticalLayoutWidget)
+		self.toolButton_3 = QtGui.QToolButton(Dialog)
 		self.toolButton_3.setToolTip("Quit")
 		icon3 = QtGui.QIcon()
 		icon3.addPixmap(QtGui.QPixmap("icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -286,7 +247,7 @@ class Ui_Qtwit(object):
 		self.toolButton_3.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_3.setObjectName("toolButton_3")
 		self.horizontalLayout_2.addWidget(self.toolButton_3)
-		self.toolButton_4 = QtGui.QToolButton(self.verticalLayoutWidget)
+		self.toolButton_4 = QtGui.QToolButton(Dialog)
 		self.toolButton_4.setToolTip("About")
 		icon4 = QtGui.QIcon()
 		icon4.addPixmap(QtGui.QPixmap("icons/about.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -299,35 +260,40 @@ class Ui_Qtwit(object):
 		self.horizontalLayout.setObjectName("horizontalLayout")
 		self.verticalLayout = QtGui.QVBoxLayout()
 		self.verticalLayout.setObjectName("verticalLayout")
-		self.pushButton_5 = QtGui.QPushButton(self.verticalLayoutWidget)
+		self.pushButton_5 = QtGui.QPushButton(Dialog)
 		self.pushButton_5.setObjectName("pushButton_5")
 		self.verticalLayout.addWidget(self.pushButton_5)
-		self.pushButton_3 = QtGui.QPushButton(self.verticalLayoutWidget)
+		self.pushButton_3 = QtGui.QPushButton(Dialog)
 		self.pushButton_3.setObjectName("pushButton_3")
 		self.verticalLayout.addWidget(self.pushButton_3)
-		self.pushButton_2 = QtGui.QPushButton(self.verticalLayoutWidget)
+		self.pushButton_2 = QtGui.QPushButton(Dialog)
 		self.pushButton_2.setIconSize(QtCore.QSize(12, 12))
 		self.pushButton_2.setObjectName("pushButton_2")
 		self.verticalLayout.addWidget(self.pushButton_2)
-		self.pushButton_4 = QtGui.QPushButton(self.verticalLayoutWidget)
+		self.pushButton_4 = QtGui.QPushButton(Dialog)
 		self.pushButton_4.setObjectName("pushButton_4")
 		self.verticalLayout.addWidget(self.pushButton_4)
 		spacerItem1 = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
 		self.verticalLayout.addItem(spacerItem1)
 		self.horizontalLayout.addLayout(self.verticalLayout)
-		self.listWidget = QtGui.QListWidget(self.verticalLayoutWidget)
-		sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
+		self.listWidget = QtGui.QListWidget(Dialog)
+		
+		sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
+		#sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
 		self.listWidget.setSizePolicy(sizePolicy)
 		self.listWidget.setWordWrap(True)
 		self.listWidget.setObjectName("listWidget")
 		self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+		#self.listWidget.setSizePolicy(QSizePolicy.Expanding)
+		self.listWidget.setWrapping(True)
+		#self.listWidget.setViewMode(1)
+		self.listWidget.setFlow(QtGui.QListView.LeftToRight)
 		
 		self.horizontalLayout.addWidget(self.listWidget)
 		self.verticalLayout_2.addLayout(self.horizontalLayout)
-		
+		self.verticalLayout_3.addLayout(self.verticalLayout_2)
 		
 		self.systemTrayMenu = QMenu()
 		self.postnew = self.systemTrayMenu.addAction(QtGui.QIcon('./icons/new.png'),'New Post')
@@ -360,7 +326,6 @@ class Ui_Qtwit(object):
 		#Authenticate when opened first time
 		self.showSettings()
 		
-	
 	def __icon_triggerd(self,reason):
 	    print 'dasdasdas'
 	    print reason
@@ -374,10 +339,7 @@ class Ui_Qtwit(object):
 				    "system tray. To terminate the program, "
 				    "choose <b>Quit</b> in the context menu "
 				    "of the system tray entry.",QtGui.QMessageBox.Ok)
-		self.Dialog.hide()
-
-                
-	    
+		self.Dialog.hide()           
 
 	def retranslateUi(self, Dialog):
 		Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "QtWitter", None, QtGui.QApplication.UnicodeUTF8))
@@ -396,12 +358,11 @@ class Ui_Qtwit(object):
 		about.setupUi(dialog)
 		dialog.show()
 		dialog.exec_()
-		
-	
+
 	def New(self):
 	    self.postNew(None)
 
-    	def postNew(self,toSpecific):
+	def postNew(self,toSpecific):
 		
 	    global API
 	    status = None
@@ -500,7 +461,7 @@ class Ui_Qtwit(object):
 		global API
 		
 		API = twitter.Api(username=USER,password = PASSWORD)
-		
+		"""
 		try:
 		    FRIENDS = API.GetFriends()
 		except twitter.TwitterError as eror:
@@ -514,7 +475,7 @@ class Ui_Qtwit(object):
 		    error = QErrorMessage()
 		    error.showMessage(QString(str(eror)))
 		    error.exec_()
-	
+		"""
 	    
 	def showMessage(self):
 	    global API
@@ -524,26 +485,47 @@ class Ui_Qtwit(object):
 	    try:
 		print 'showMessage Called'
 		self.listWidget.clear()
-		user = API.GetUser(USER)
-		screen = user.GetScreenName()
+		
 		STATUS = API.GetFriendsTimeline() 
-		for s in STATUS:
+		i = 0
+		temp = len(STATUS)
+		
+		for i in range(0,temp):
+		    #print i
+		    #print len(STATUS)
+		    s = STATUS[i]
 		    friend = s.GetUser()
-		    a = QtCore.QString()
+		    
+		    
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    url = urllib.URLopener()
+		    if not os.path.isfile("./profile_images/"+icon_name[1]):
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"./profile_images/"+icon_name[1])
+		        
+		    #print friend.GetScreenName()
+		    name = QListWidgetItem(QIcon(QString("./profile_images/"+icon_name[1])),s.GetText())
+		    size = QSize(48,48)
+		    self.listWidget.setIconSize(size)
+		    
+		    
+		    self.listWidget.addItem(name)
 		    a = friend.GetScreenName()
 		    self.listWidget.addItem(a)
-		    a = s.GetText()
-		    self.listWidget.addItem(a)
-		    self.listWidget.addItem('\n')
+		    self.listWidget.addItem('                   \n')
+		    
+		    
 	    except twitter.TwitterError as a:
 		eror=QErrorMessage()
 		eror.showMessage(a.message)
 		eror.exec_()
 	    except urllib2.HTTPError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",s)
+		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 		error.show()
 	    except urllib2.URLError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",s)
+		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 		error.show()
 		
 		
@@ -600,10 +582,10 @@ class Ui_Qtwit(object):
 		eror.showMessage(a.message)
 		eror.exec_()
 	    except urllib2.HTTPError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",s)
+		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 		error.show()
 	    except urllib2.URLError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",s)
+		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 		error.show()
 	    
 	def openContextMenu(self):
@@ -613,8 +595,8 @@ class Ui_Qtwit(object):
 	    cursor = QCursor()
 	    menu = QtGui.QMenu()
 	    flag = self.listWidget.currentRow()
-	    
-	    if flag%3 == 0:
+	    print flag
+	    if (flag-1)%3 == 0:
 		retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
 		reply = menu.addAction(QtGui.QIcon("./icons/reply.png"), "Reply")
 		whoIs = menu.addAction(QtGui.QIcon("./icons/whois.png"), "Who Is?")
@@ -638,14 +620,14 @@ class Ui_Qtwit(object):
 		    header = '@'+friend_item.text()
 		    self.showReply(header)
 		    
-		if action == delete:
+		if friend_item.text() == 'zarthon' and action == delete :
 		    
 		    dialog = QtGui.QDialog()
 		    reply = QtGui.QMessageBox.warning(dialog, 'Message',"Are you sure You want to DELETE? There is no UNDOING", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
 		    if reply == QtGui.QMessageBox.Yes:
 			row = self.listWidget.currentRow()
-			index = row/3
+			index = row-1/3
 			self.listWidget.takeItem(row)
 			self.listWidget.takeItem(row)
 			self.listWidget.takeItem(row)
@@ -660,21 +642,26 @@ class Ui_Qtwit(object):
 			    error = QErrorMessage()
 			    error.showMessage(eror.message)
 			except urllib2.HTTPError as eror:
-			    error = QMessageBox.critical(self.Dialog,"Error",s)
+			    error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 			    error.show()
 			except urllib2.URLError as eror:
-			    error = QMessageBox.critical(self.Dialog,"Error",s)
+			    error = QMessageBox.critical(self.Dialog,"Error",str(eror))
 			    error.show()
 			    
 			Successful = QMessageBox(1,'Successful','Status Destroyed')
 			Successful.show()  
 			Successful.exec_()
 		    
-		"""if action == whoIs:
-		    item = self.listWidget.currentItem()
-		    self.showWhoIs(item.text())"""
+		if action == whoIs:
+		    row = self.listWidget.currentRow()
+		    index = row/3
+		    item = STATUS[index].GetUser()
+		    item_id = item.GetId()
+		    user = API.GetUser(item_id)
+		    print user.GetStatus()
+		    self.showWhoIs(user)
 		    
-	    if (flag-1)%3 == 0:
+	    if (flag)%3 == 0:
 		retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
 		reply = menu.addAction(QtGui.QIcon("./icons/reply.png"),"Reply")
 		favorite = menu.addAction(QtGui.QIcon("./icons/favorite.png"),"Favorite")
@@ -693,7 +680,14 @@ class Ui_Qtwit(object):
 		    row = self.listWidget.currentRow()
 		    friend_item = self.listWidget.item(row-1)
 		    self.showReply('@'+friend_item.text())
-		
+		    
+	def showWhoIs(self,user):
+	    Dialog = QDialog()
+	    whois = Ui_whoIs()
+	    whois.setupUi(Dialog,user)
+	    Dialog.show()
+	    Dialog.exec_()
+
 
 app = QtGui.QApplication(sys.argv)
 asd = QDialog()

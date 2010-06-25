@@ -2,8 +2,8 @@ Setup Direct messages
 Make README
 Make License
 
-Search for Dialog.closeEvent
+DONE: Search for Dialog.closeEvent
 
-Find way to display profile pictures in listwidget either change it
+DONE: Find way to display profile pictures in listwidget either change it
 
-Implement WhoIs contextAction
+DONE: Implement WhoIs contextAction
