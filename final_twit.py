@@ -3,6 +3,7 @@ import twitter
 import traceback
 from PyQt4 import QtGui
 from threading import Timer
+import thread, threading
 from PyQt4 import QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -18,18 +19,102 @@ FRIENDS = None
 OWN_STATUS = None
 API = None
 STATUS = None
-TIMER_FLAG = 1
+MESSAGE_FLAG = 0
+PUBLIC_FLAG =0
+PUBLIC_MESAGE = 0
 Time = None
+REPLIES = None
+MESSAGES = None
 
-def Time_Action(QtWit):
-    global Time
-    Time = Timer(60.0,QtWit.showMessage)
-    Time.start()
     
+class Ui_Direct(object):
+    def setupUi(self, Dialog,screenName):
+	global API
+	global FRIENDS
+	
+        Dialog.setObjectName("Dialog")
+        Dialog.setFixedSize(328, 277)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(Dialog)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.label = QtGui.QLabel(Dialog)
+        self.label.setObjectName("label")
+        self.horizontalLayout.addWidget(self.label)
+        self.comboBox = QtGui.QComboBox(Dialog)
+        self.comboBox.setObjectName("comboBox")
+        self.horizontalLayout.addWidget(self.comboBox)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.plainTextEdit = QtGui.QPlainTextEdit(Dialog)
+        self.plainTextEdit.setMaximumBlockCount(140)
+        self.plainTextEdit.setObjectName("plainTextEdit")
+        self.verticalLayout.addWidget(self.plainTextEdit)
+        self.buttonBox = QtGui.QDialogButtonBox(Dialog)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setCenterButtons(False)
+        self.buttonBox.setObjectName("buttonBox")
+        self.verticalLayout.addWidget(self.buttonBox)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.Dialog = Dialog
+        
+        length = len(FRIENDS)
+        screen = []
+        for i in range(0,length):
+	    self.comboBox.addItem(str(FRIENDS[i].GetScreenName()))
+	    screen.append(str(FRIENDS[i].GetScreenName()))
+	    
+	index = screen.index(screenName)
+	self.comboBox.setCurrentIndex(index)
+        self.retranslateUi(Dialog)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.newDirect)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), Dialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
 
+    def retranslateUi(self, Dialog):
+        Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("Dialog", "To:", None, QtGui.QApplication.UnicodeUTF8))
+        
+    def newDirect(self):
+	global API
+	
+	print 'NewDirect Reached'
+	text = self.plainTextEdit.toPlainText()
+	
+	if text.size()>140:
+	    text = text.remove(140,99999999)
+	    msg = QMessageBox(1,"Large Text","Only Following Message will be Posted: \n"+text)
+	    text = str(text)
+	   
+	try:
+	    user = str(self.comboBox.currentText())
+	    print text
+	    print user
+	    API.PostDirectMessage(user,text)
+	except twitter.TwitterError as eror:
+	    error = QErrorMessage()
+	    error.showMessage(eror.message)
+	except urllib2.HTTPError as eror:
+	    error = QMessageBox(3,"Error",str(eror))
+	    error.show()
+	    error.exec_()
+	except urllib2.URLError as eror:
+	    error = QMessageBox(3,"Error",str(s))
+	    error.show()
+	    error.exec_()
+	else:
+	    Successful = QMessageBox(1,'Successful','New Message Sent')
+	    Successful.show()
+	    Successful.exec_()
+	    self.Dialog.hide()
+		
 
 class Ui_Reply(object):
     def setupUi(self, Dialog):
+	global FRIENDS
+	
         Dialog.setObjectName("Dialog")
         Dialog.resize(253, 377)
         Dialog.setSizeIncrement(QtCore.QSize(0, 48))
@@ -61,7 +146,8 @@ class Ui_Reply(object):
         self.listWidget.setObjectName("listWidget")
         
         self.verticalLayout.addWidget(self.listWidget)
-
+        
+	
         self.retranslateUi(Dialog)
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.comboFilter)
         QtCore.QObject.connect(self.lineEdit, QtCore.SIGNAL("textChanged(QString)"), self.searchFilter)
@@ -137,14 +223,18 @@ class Ui_Reply(object):
 	    error = QErrorMessage()
 	    error.showMessage(eror.message)
 	except urllib2.HTTPError as eror:
-	    error = QMessageBox.critical(self.Dialog,"Error",s)
+	    error = QMessageBox(3,"Error",str(eror))
 	    error.show()
+	    error.exec_()
+	    
 	except urllib2.URLError as eror:
-	    error = QMessageBox.critical(self.Dialog,"Error",s)
+	    error = QMessageBox(3,"Error",str(eror))
 	    error.show()
-	Successful = QMessageBox(1,'Successful','Reply Successfully Posted')
-	Successful.show()  
-	Successful.exec_()
+	    error.exec_()
+	else:
+	    Successful = QMessageBox(1,'Successful','Reply Successfully Posted')
+	    Successful.show()  
+	    Successful.exec_()
 	
 	
 class Ui_Settings(object):
@@ -286,9 +376,8 @@ class Ui_Qtwit(object):
 		self.listWidget.setWordWrap(True)
 		self.listWidget.setObjectName("listWidget")
 		self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-		#self.listWidget.setSizePolicy(QSizePolicy.Expanding)
 		self.listWidget.setWrapping(True)
-		#self.listWidget.setViewMode(1)
+		self.listWidget.setViewMode(0)
 		self.listWidget.setFlow(QtGui.QListView.LeftToRight)
 		
 		self.horizontalLayout.addWidget(self.listWidget)
@@ -310,11 +399,11 @@ class Ui_Qtwit(object):
 		QtCore.QObject.connect(self.toolButton_5,QtCore.SIGNAL("clicked()"),self.showMessage)
 		QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL("clicked()"), self.New)
 		QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), self.showSettings)
-		#QtCore.QObject.connect(self.pushButton_5, QtCore.SIGNAL("clicked()"), self.destroyStatus)
+		QtCore.QObject.connect(self.pushButton_5, QtCore.SIGNAL("clicked()"), self.publicStatus)
 		QtCore.QObject.connect(self.pushButton_3, QtCore.SIGNAL("clicked()"), self.Reply)
 		QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("clicked()"), self.showReplies)
 		
-		#QtCore.QObject.connect(self.pushButton_4, QtCore.SIGNAL("clicked()"), self.showDirectMessage)
+		QtCore.QObject.connect(self.pushButton_4, QtCore.SIGNAL("clicked()"), self.showDirectMessage)
 		QtCore.QObject.connect(self.systemTray,QtCore.SIGNAL("activated(QSystemTrayIcon::ActivationReason)"),self.__icon_triggerd)
 		QtCore.QMetaObject.connectSlotsByName(Dialog)
 		self.Dialog = Dialog
@@ -332,7 +421,7 @@ class Ui_Qtwit(object):
 	    if reason == 3:
 		self.Dialog.setVisible(not self.Dialog.isVisible())
 	    
-	def CloseEvent(self):
+	def closeEvent(Dialog):
 	    print type(self)
 	    if self.Dialog.isVisible() == True:
 		msg = QMessageBox.question(self.Dialog,"SysTray","The program will keep running in the "
@@ -347,9 +436,9 @@ class Ui_Qtwit(object):
 		self.toolButton_2.setText(QtGui.QApplication.translate("Dialog", "...", None, QtGui.QApplication.UnicodeUTF8))
 		self.toolButton_3.setText(QtGui.QApplication.translate("Dialog", "...", None, QtGui.QApplication.UnicodeUTF8))
 		self.toolButton_4.setText(QtGui.QApplication.translate("Dialog", "...", None, QtGui.QApplication.UnicodeUTF8))
-		self.pushButton_5.setText(QtGui.QApplication.translate("Dialog", "Destroy Status", None, QtGui.QApplication.UnicodeUTF8))
+		self.pushButton_5.setText(QtGui.QApplication.translate("Dialog", "Get Public Status", None, QtGui.QApplication.UnicodeUTF8))
 		self.pushButton_3.setText(QtGui.QApplication.translate("Dialog", "Reply", None, QtGui.QApplication.UnicodeUTF8))
-		self.pushButton_2.setText(QtGui.QApplication.translate("Dialog", "GetReplies", None, QtGui.QApplication.UnicodeUTF8))
+		self.pushButton_2.setText(QtGui.QApplication.translate("Dialog", "Get Replies", None, QtGui.QApplication.UnicodeUTF8))
 		self.pushButton_4.setText(QtGui.QApplication.translate("Dialog", "Direct Message", None, QtGui.QApplication.UnicodeUTF8))
 	
 	def showAbout(self):
@@ -381,17 +470,20 @@ class Ui_Qtwit(object):
 		    try:
 			print status
 			API.PostUpdates(status)
-			Time_Action(self)
+			
 		    except twitter.TwitterError as eror:
 			error = QErrorMessage()
 			error.showMessage(eror.message)
 		    except urllib2.HTTPError as eror:
-			error = QMessageBox.critical(self.Dialog,"Error",s)
+			error = QMessageBox(3,"Error",str(eror))
 			error.show()
+			error.exec_()
 		    except urllib2.URLError as eror:
-			error = QMessageBox.critical(self.Dialog,"Error",s)
+			error = QMessageBox(3,"Error",str(eror))
 			error.show()
-			
+			error.exec_()
+		
+		   
 		    Successful = QMessageBox(1,'Successful','New Status Successfully Posted')
 		    Successful.show()  
 		    Successful.exec_()
@@ -413,16 +505,18 @@ class Ui_Qtwit(object):
 			status = str(toSpecific) + ' ' + status
 			print status
 			API.PostUpdates(status)
-			Time_Action(self)
+			
 		    except twitter.TwitterError as eror:
 			error = QErrorMessage()
 			error.showMessage(eror.message)
 		    except urllib2.HTTPError as eror:
-			error = QMessageBox.critical(self.Dialog,"Error",s)
+			error = QMessageBox(3,"Error",str(eror))
 			error.show()
+			error.exec_()
 		    except urllib2.URLError as eror:
-			error = QMessageBox.critical(self.Dialog,"Error",s)
+			error = QMessageBox(3,"Error",str(s))
 			error.show()
+			error.exec_()
 			
 		    Successful = QMessageBox(1,'Successful','New Status Successfully Posted')
 		    Successful.show()
@@ -432,7 +526,7 @@ class Ui_Qtwit(object):
 		try:
 		    status = str(toSpecific)
 		    API.PostUpdates(status)
-		    Time_Action(self)
+		    
 		except twitter.TwitterError as eror:
 		    error = QErrorMessage()
 		    error.showMessage(eror.message)
@@ -459,40 +553,50 @@ class Ui_Qtwit(object):
 		global FRIENDS
 		global OWN_STATUS
 		global API
-		
+		global REPLIES
 		API = twitter.Api(username=USER,password = PASSWORD)
-		"""
+		
 		try:
+		    busy = QMessageBox(1,"Busy","Please Wait..API downloading your DATA",QMessageBox.NoButton)
+		    busy.show()
+		    
+		    REPLIES = API.GetReplies()
 		    FRIENDS = API.GetFriends()
+		    busy.hide()
 		except twitter.TwitterError as eror:
 		    error = QErrorMessage()
 		    error.showMessage(eror.message)
 		except urllib2.HTTPError as eror:
-		    error = QErrorMessage()
-		    error.showMessage(QString(str(eror)))
+		    error = QMessageBox(3,"Error",str(s))
+		    error.show()
 		    error.exec_()
 		except urllib2.URLError as eror:
-		    error = QErrorMessage()
-		    error.showMessage(QString(str(eror)))
+		    error = QMessageBox(3,"Error",str(s))
+		    error.show()
 		    error.exec_()
-		"""
+		
 	    
 	def showMessage(self):
 	    global API
 	    global USER
 	    global STATUS
+	    global MESSAGE_FLAG
+	    global PUBLIC_FLAG
 	    
 	    try:
 		print 'showMessage Called'
 		self.listWidget.clear()
+		busy = QMessageBox(1,"Busy","Please Wait..API downloading your DATA")
+		busy.show()
 		
 		STATUS = API.GetFriendsTimeline() 
+		busy.hide()
 		i = 0
 		temp = len(STATUS)
 		
 		for i in range(0,temp):
-		    #print i
-		    #print len(STATUS)
+		    MESSAGE_FLAG = 0
+		    PUBLIC_FLAG = 0
 		    s = STATUS[i]
 		    friend = s.GetUser()
 		    
@@ -510,11 +614,12 @@ class Ui_Qtwit(object):
 		    size = QSize(48,48)
 		    self.listWidget.setIconSize(size)
 		    
-		    
-		    self.listWidget.addItem(name)
 		    a = friend.GetScreenName()
 		    self.listWidget.addItem(a)
-		    self.listWidget.addItem('                   \n')
+		    self.listWidget.addItem(name)
+		    
+		    
+		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
 		    
 		    
 	    except twitter.TwitterError as a:
@@ -522,15 +627,60 @@ class Ui_Qtwit(object):
 		eror.showMessage(a.message)
 		eror.exec_()
 	    except urllib2.HTTPError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
+		error = QMessageBox(3,"Error",str(eror))
 		error.show()
+		error.exec_()
 	    except urllib2.URLError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
+		error = QMessageBox(3,"Error",str(eror))
 		error.show()
+		error.exec_()
 		
+	def publicStatus(self):
+	    global PUBLIC_MESAGE
+	    global API
+	    global MESSAGE_FLAG
+	    global PUBLIC_FLAG
+	    
+	    try:
+		PUBLIC_FLAG =1
 		
-#def destroyStatus(self):
-
+		PUBLIC_MESAGE = API.GetPublicTimeline()
+		self.listWidget.clear()
+		for s in PUBLIC_MESAGE:
+		    MESSAGE_FLAG = 0
+		    friend = s.GetUser()
+		    a = QtCore.QString()
+		    a = friend.GetScreenName()
+		    self.listWidget.addItem(a)
+		    
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    url = urllib.URLopener()
+		    if not os.path.isfile("./profile_images/"+icon_name[1]):
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"./profile_images/"+icon_name[1])
+			
+		    size = QSize(48,48)
+		    self.listWidget.setIconSize(size)
+		    #print friend.GetScreenName()
+		    name = QListWidgetItem(QIcon(QString("./profile_images/"+icon_name[1])),s.GetText())
+		    
+		    self.listWidget.addItem(name)
+		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+	    except twitter.TwitterError as a:
+		eror=QErrorMessage()
+		eror.showMessage(a.message)
+		eror.exec_()
+	    except urllib2.HTTPError as eror:
+		error = QMessageBox(3,"Error",str(eror))
+		error.show()
+		error.exec_()
+	    except urllib2.URLError as eror:
+		error = QMessageBox(3,"Error",str(eror))
+		error.show()
+		error.exec_()
+		
 	def Reply(self):
 	    self.showReply(None)
 	    
@@ -559,127 +709,273 @@ class Ui_Qtwit(object):
 	    API.CreateFavorite(status)
 	    
 	    
-#    #def showDirectMessage(self):
-      
+	def showDirectMessage(self):
+	    global MESSAGES
+	    global API
+	    global MESSAGE_FLAG
+	    global PUBLIC_FLAG
+	    
+	    MESSAGES = API.GetDirectMessages()
+	    self.listWidget.clear()
+	    for m in MESSAGES:
+		MESSAGE_FLAG = 1
+		PUBLIC_FLAG =0
+		sender_id = m.GetSenderId()
+		sender_user = API.GetUser(sender_id)
+		
+		a = sender_user.GetScreenName()
+		self.listWidget.addItem(a)
+
+		icon_url = sender_user.GetProfileImageUrl()
+		print icon_url
+		icon_name = icon_url.rsplit('/',1)
+		print "./profile_images/"+icon_name[1]
+		filena = "./profile_images/"+icon_name[1]
+		url = urllib.URLopener()
+		print os.path.isfile(filena)
+		if os.path.isfile(filena) == False:
+		    name = icon_name[1].rsplit('.',1)
+		    print name[1]
+		    if name[1] == 'gif':
+			icon_name[1] = name[0]+'.png'
+		    url.retrieve(icon_url,icon_name[1])
+		    shutil.move(icon_name[1],"./profile_images/"+icon_name[1])
+			
+		size = QSize(48,48)
+		self.listWidget.setIconSize(size)
+		    #print friend.GetScreenName()
+		name = QListWidgetItem(QIcon(QString("./profile_images/"+icon_name[1])),m.GetText())
+		    
+		self.listWidget.addItem(name)
+		self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+		
+	    
 	def showReplies(self):
 	    global REPLIES
 	    global API
-	    
+	    global MESSAGE_FLAG
+	    global PUBLIC_FLAG
 	    
 	    try:
-		REPLIES = API.GetReplies()
+		MESSAGE_FLAG = 0
+		PUBLIC_FLAG = 0
+		
 		self.listWidget.clear()
 		for s in REPLIES:
+		    
 		    friend = s.GetUser()
 		    a = QtCore.QString()
 		    a = friend.GetScreenName()
 		    self.listWidget.addItem(a)
-		    a = s.GetText()
-		    self.listWidget.addItem(a)
-		    self.listWidget.addItem('\n')
+		    
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    url = urllib.URLopener()
+		    if not os.path.isfile("./profile_images/"+icon_name[1]):
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"./profile_images/"+icon_name[1])
+			
+		    size = QSize(48,48)
+		    self.listWidget.setIconSize(size)
+		    #print friend.GetScreenName()
+		    name = QListWidgetItem(QIcon(QString("./profile_images/"+icon_name[1])),s.GetText())
+		    
+		    self.listWidget.addItem(name)
+		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+		    
 	    except twitter.TwitterError as a:
 		eror=QErrorMessage()
 		eror.showMessage(a.message)
 		eror.exec_()
 	    except urllib2.HTTPError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
+		error = QMessageBox(3,"Error",str(eror))
 		error.show()
+		error.exec_()
 	    except urllib2.URLError as eror:
-		error = QMessageBox.critical(self.Dialog,"Error",str(eror))
+		error = QMessageBox(3,"Error",str(eror))
 		error.show()
-	    
+		error.exec_()
+		
 	def openContextMenu(self):
 	    global STATUS
 	    global API
+	    global MESSAGES
+	    global MESSAGE_FLAG
+	    global PUBLIC_FLAG
+	    global PUBLIC_MESAGE
 	    
 	    cursor = QCursor()
 	    menu = QtGui.QMenu()
 	    flag = self.listWidget.currentRow()
 	    print flag
-	    if (flag-1)%3 == 0:
-		retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
-		reply = menu.addAction(QtGui.QIcon("./icons/reply.png"), "Reply")
-		whoIs = menu.addAction(QtGui.QIcon("./icons/whois.png"), "Who Is?")
-		quitAction = menu.addAction(QtGui.QIcon('./icons/close.png'),"Quit")
-	    
-		#favorite.setIcon(QtGui.QIcon('icons/web64.png'))
-		friend_item = self.listWidget.currentItem()
+	    print PUBLIC_FLAG
+	    print MESSAGE_FLAG
+	    if MESSAGE_FLAG == 0 or PUBLIC_FLAG ==1:
+		if (flag)%3 == 0:
+		    retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
+		    reply = menu.addAction(QtGui.QIcon("./icons/reply.png"), "Reply")
+		    whoIs = menu.addAction(QtGui.QIcon("./icons/whois.png"), "Who Is?")
+		    sep_action = QAction(None)
+		    sep_action.setSeparator(True)
+		    sep = menu.addAction(sep_action)
+		    
 		
-		if friend_item.text() == 'zarthon':
+		    #favorite.setIcon(QtGui.QIcon('icons/web64.png'))
+		    friend_item = self.listWidget.currentItem()
+		    
+		    if friend_item.text() == 'zarthon':
+			delete = menu.addAction(QtGui.QIcon("./icons/delete.png"),"Delete")
+		    quitAction = menu.addAction(QtGui.QIcon('./icons/close.png'),"Quit")    
+		    action = menu.exec_(cursor.pos())
+		
+		    if action == retweet:
+			nameIndex = self.listWidget.currentRow()
+			self.showRetweet(self.listWidget.item(nameIndex+1),self.listWidget.currentItem())
+		    if action == quitAction:
+			qApp.quit()
+		    if action == reply:
+			friend_item = self.listWidget.currentItem()
+			header = '@'+friend_item.text()
+			self.showReply(header)
+			
+		    if friend_item.text() == 'zarthon' and action == delete :
+			
+			dialog = QtGui.QDialog()
+			reply = QtGui.QMessageBox.warning(dialog, 'Message',"Are you sure You want to DELETE? There is no UNDOING", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+			if reply == QtGui.QMessageBox.Yes:
+			    row = self.listWidget.currentRow()
+			    index = (row)/3
+			    
+			    print type(STATUS)
+			    try:
+				id_del = STATUS[index].GetId()
+				print id_del
+				API.DestroyStatus(id_del)
+				self.listWidget.takeItem(row)
+				self.listWidget.takeItem(row)
+				self.listWidget.takeItem(row)
+				print len(STATUS)
+				del STATUS[index]
+				print len(STATUS)
+			    except twitter.TwitterError as eror:
+				error = QErrorMessage()
+				error.showMessage(eror.message)
+			    except urllib2.HTTPError as eror:
+				error = QMessageBox(3,"Error",str(eror))
+				error.show()
+				error.exec_()
+			    except urllib2.URLError as eror:
+				error = QMessageBox(3,"Error",str(eror))
+				error.show()
+				error.exec_()
+			    else:    
+				Successful = QMessageBox(1,'Successful','Status Destroyed')
+				Successful.show()  
+				Successful.exec_()
+			
+		    if action == whoIs:
+			row = self.listWidget.currentRow()
+			index = row/3
+			if PUBLIC_FLAG ==0:
+			    item = STATUS[index].GetUser()
+			else:
+			    item = PUBLIC_MESAGE[index].GetUser()
+			item_id = item.GetId()
+			user = API.GetUser(item_id)
+			print user.GetStatus()
+			self.showWhoIs(user)
+			
+		if (flag-1)%3 == 0:
+		    retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
+		    reply = menu.addAction(QtGui.QIcon("./icons/reply.png"),"Reply")
+		    favorite = menu.addAction(QtGui.QIcon("./icons/favorite.png"),"Favorite")
+		    
+		    sep_action = QAction(None)
+		    sep_action.setSeparator(True)
+		    sep = menu.addAction(sep_action)
+		    quitAction = menu.addAction(QtGui.QIcon('./icons/close.png'),"Quit")
+		    action = menu.exec_(cursor.pos())
+		
+		    if action == retweet:
+			msgIndex = self.listWidget.currentRow()
+			self.showRetweet(self.listWidget.item(msgIndex),self.listWidget.currentItem())
+		    if action == quitAction:
+			qApp.quit()
+		    if action == favorite:
+			self.addFavorite(self.listWidget.currentRow())
+		    if action == reply:
+			row = self.listWidget.currentRow()
+			friend_item = self.listWidget.item(row-1)
+			self.showReply('@'+friend_item.text())
+			
+	    elif MESSAGE_FLAG ==1 and PUBLIC_FLAG ==0:
+		cursor = QCursor()
+		menu = QtGui.QMenu()
+		flag = self.listWidget.currentRow()
+		print flag
+		if flag%3==0 or (flag-1)%3 == 0:
+		    reply = menu.addAction(QtGui.QIcon("./icons/reply.png"),"Reply")
 		    delete = menu.addAction(QtGui.QIcon("./icons/delete.png"),"Delete")
 		    
-		action = menu.exec_(cursor.pos())
-	    
-		if action == retweet:
-		    nameIndex = self.listWidget.currentRow()
-		    self.showRetweet(self.listWidget.item(nameIndex+1),self.listWidget.currentItem())
-		if action == quitAction:
-		    qApp.quit()
-		if action == reply:
-		    friend_item = self.listWidget.currentItem()
-		    header = '@'+friend_item.text()
-		    self.showReply(header)
+		    sep_action = QAction(None)
+		    sep_action.setSeparator(True)
+		    sep = menu.addAction(sep_action)
+		    quitAction = menu.addAction(QtGui.QIcon('./icons/close.png'),"Quit")
+		    action = menu.exec_(cursor.pos())
 		    
-		if friend_item.text() == 'zarthon' and action == delete :
-		    
-		    dialog = QtGui.QDialog()
-		    reply = QtGui.QMessageBox.warning(dialog, 'Message',"Are you sure You want to DELETE? There is no UNDOING", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-
-		    if reply == QtGui.QMessageBox.Yes:
-			row = self.listWidget.currentRow()
-			index = row-1/3
-			self.listWidget.takeItem(row)
-			self.listWidget.takeItem(row)
-			self.listWidget.takeItem(row)
-			print type(STATUS)
-			try:
-			    id_del = STATUS[index].GetId()
-			    API.DestroyStatus(id_del)
-			    del STATUS[index]
-			    time = Timer(30.0,self.showMessage)
-			    time.start()
-			except twitter.TwitterError as eror:
-			    error = QErrorMessage()
-			    error.showMessage(eror.message)
-			except urllib2.HTTPError as eror:
-			    error = QMessageBox.critical(self.Dialog,"Error",str(eror))
-			    error.show()
-			except urllib2.URLError as eror:
-			    error = QMessageBox.critical(self.Dialog,"Error",str(eror))
-			    error.show()
+		    if action == quitAction:
+			qApp.quit()
+		    if action == reply:
+			if flag%3 ==0:
+			    friend_item = self.listWidget.currentItem()
+			else:
+			    row = self.listWidget.currentRow()
+			    friend_item = self.listWidget.item(row-1)
+			Dialog = QDialog()
+			direct = Ui_Direct()
+			direct.setupUi(Dialog,friend_item.text())
+			Dialog.show()
+			Dialog.exec_()
+		    if action == delete:
+			if flag%3 ==0:
+			    index = self.listWidget.currentRow() +1
+			    message = MESSAGES[index/3]
+			    id_del = message.GetId()
+			else:
+			    index = self.listWidget.currentRow()
+			    message = MESSAGES[(index-1)/3]
+			    id_del = message.GetId()
 			    
-			Successful = QMessageBox(1,'Successful','Status Destroyed')
-			Successful.show()  
-			Successful.exec_()
-		    
-		if action == whoIs:
-		    row = self.listWidget.currentRow()
-		    index = row/3
-		    item = STATUS[index].GetUser()
-		    item_id = item.GetId()
-		    user = API.GetUser(item_id)
-		    print user.GetStatus()
-		    self.showWhoIs(user)
-		    
-	    if (flag)%3 == 0:
-		retweet = menu.addAction(QtGui.QIcon("./icons/retweet.png"),"ReTweet")
-		reply = menu.addAction(QtGui.QIcon("./icons/reply.png"),"Reply")
-		favorite = menu.addAction(QtGui.QIcon("./icons/favorite.png"),"Favorite")
-		quitAction = menu.addAction(QtGui.QIcon('./icons/close.png'),"Quit")
-	    
-		action = menu.exec_(cursor.pos())
-	    
-		if action == retweet:
-		    msgIndex = self.listWidget.currentRow()
-		    self.showRetweet(self.listWidget.item(msgIndex),self.listWidget.currentItem())
-		if action == quitAction:
-		    qApp.quit()
-		if action == favorite:
-		    self.addFavorite(self.listWidget.currentRow())
-		if action == reply:
-		    row = self.listWidget.currentRow()
-		    friend_item = self.listWidget.item(row-1)
-		    self.showReply('@'+friend_item.text())
+			dialog = QtGui.QDialog()
+			reply = QtGui.QMessageBox.warning(dialog, 'Message',"Are you sure You want to DELETE? There is no UNDOING", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+			if reply == QtGui.QMessageBox.Yes:
+			    try:
+				print id_del
+				row = self.listWidget.currentRow()
+				API.DestroyDirectMessage(id_del)
+				self.listWidget.takeItem(row)
+				self.listWidget.takeItem(row)
+				self.listWidget.takeItem(row)
+			    except twitter.TwitterError as eror:
+				error = QErrorMessage()
+				error.showMessage(eror.message)
+			    except urllib2.HTTPError as eror:
+				error = QMessageBox(3,"Error",str(eror))
+				error.show()
+				error.exec_()
+			    except urllib2.URLError as eror:
+				error = QMessageBox(3,"Error",str(eror))
+				error.show()
+				error.exec_()
+			    else:    
+				Successful = QMessageBox(1,'Successful','Message Destroyed')
+				Successful.show()  
+				Successful.exec_()
+			    
+			    
 		    
 	def showWhoIs(self,user):
 	    Dialog = QDialog()

@@ -22,10 +22,12 @@ class Ui_About(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label = QtGui.QLabel(self.horizontalLayoutWidget)
         self.label.setObjectName("label")
+	
         self.horizontalLayout.addWidget(self.label)
         self.label_2 = QtGui.QLabel(self.horizontalLayoutWidget)
         self.label_2.setWordWrap(True)
         self.label_2.setObjectName("label_2")
+	self.label_2.setOpenExternalLinks(True)
         self.horizontalLayout.addWidget(self.label_2)
         self.pushButton = QtGui.QPushButton(Dialog)
         self.pushButton.setGeometry(QtCore.QRect(170, 240, 111, 31))
