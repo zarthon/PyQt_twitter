@@ -10,8 +10,9 @@ DONE: Implement WhoIs contextAction
 
 DONE: Send Direct message from listWidget
 
-Implement context menu functions for public messages "Adding Add friendship in public message"
+DONE:Implement context menu functions for public messages "Adding Add friendship in public message"
 
+Addin error handling in THREAD
 Add feature to save Username and Password
 
 Finalise the Code

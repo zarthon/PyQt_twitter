@@ -43,125 +43,11 @@ API = None
 STATUS = None
 MESSAGE_FLAG = 0
 PUBLIC_FLAG =0
-REPLY_FLAG = 0
-PUBLIC_MESAGE = None
+PUBLIC_MESAGE = 0
 Time = None
 REPLIES = None
 MESSAGES = None
-ERROR =None
 
-Thread_Flag = -1
-#0 for authenticate, 1 for showMessage, 2 for publicStatus, 3 for DirectMesssage, 4 for GetReplies
-class showBusy(QThread):
-    def __init__(self,parent=None):
-	QtCore.QThread.__init__(self,parent)
-    def run(self):
-	global API
-	global USER
-	global PASSWORD
-	global STATUS
-	global REPLIES
-	global MESSAGES
-	global PUBLIC_MESAGE
-	global Thread_Flag
-	
-	print 'thread running'
-	print Thread_Flag
-	if Thread_Flag == 0:
-	    API = twitter.Api(username=USER,password = PASSWORD)
-	    FRIENDS = API.GetFriends()
-	    Thread_Flag = -1
-	if Thread_Flag == 1:
-	    print 'falg 1 reached'
-	    
-	    STATUS = API.GetFriendsTimeline() 
-		#busy.hide()
-	    i = 0
-	    temp = len(STATUS)
-		
-	    for i in range(0,temp):
-	    
-		s = STATUS[i]
-		friend = s.GetUser()
-	    
-		icon_url = friend.GetProfileImageUrl()
-		#print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		if not os.path.isfile("../profile_images/"+icon_name[1]):
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
-	    
-	    Thread_Flag = -1
-	    
-	if Thread_Flag == 2:
-	    PUBLIC_MESAGE = API.GetPublicTimeline()
-	    
-	    for s in PUBLIC_MESAGE:
-		friend = s.GetUser()
-		   
-		icon_url = friend.GetProfileImageUrl()
-		#print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		if not os.path.isfile("../profile_images/"+icon_name[1]):
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
-	    Threa_Flag =-1
-	    
-	if Thread_Flag == 3:
-	    MESSAGES = API.GetDirectMessages()
-	    for m in MESSAGES:
-		sender_id = m.GetSenderId()
-		sender_user = API.GetUser(sender_id)
-
-		icon_url = sender_user.GetProfileImageUrl()
-		print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		print "../profile_images/"+icon_name[1]
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		print os.path.isfile(filena)
-		if os.path.isfile(filena) == False:
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
-	    Thread_Flag = -1
-	    
-	if Thread_Flag ==4:
-	    REPLIES = API.GetReplies()
-	    for m in REPLIES:
-		friend = m.GetUser()
-		
-		icon_url = friend.GetProfileImageUrl()
-		print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		print "../profile_images/"+icon_name[1]
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		print os.path.isfile(filena)
-		if os.path.isfile(filena) == False:
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
-	    Thread_Flag = -1
-	    
 ###################################################
 #Class to show and send Direct Messages
 ##################################################
@@ -547,10 +433,6 @@ class Ui_Zwit(object):
 		self.verticalLayout_2.addLayout(self.horizontalLayout)
 		self.verticalLayout_3.addLayout(self.verticalLayout_2)
 		
-		#Timer for regular updates
-		self.timer = QTimer()
-		#contextmenu for system tray
-		
 		self.systemTrayMenu = QMenu()
 		self.postnew = self.systemTrayMenu.addAction(QtGui.QIcon('../icons/new.png'),'New Post')
 		self.quitAction = self.systemTrayMenu.addAction(QtGui.QIcon('../icons/close.png'),"Quit")
@@ -572,9 +454,6 @@ class Ui_Zwit(object):
 		
 		QtCore.QObject.connect(self.pushButton_4, QtCore.SIGNAL("clicked()"), self.showDirectMessage)
 		QtCore.QObject.connect(self.systemTray,QtCore.SIGNAL("activated(QSystemTrayIcon::ActivationReason)"),self.icon_triggerd)
-		QtCore.QObject.connect(self.timer,QtCore.SIGNAL('timeout()'),self.showUpdate)
-		
-		
 		QtCore.QMetaObject.connectSlotsByName(Dialog)
 		
 		#Setting Shortcut for Quiting application
@@ -584,12 +463,8 @@ class Ui_Zwit(object):
 		Dialog.addAction(exit)
 		Dialog.connect(exit,QtCore.SIGNAL('triggered()'),QtGui.qApp, QtCore.SLOT('quit()'))
 		
-		
-		
-		
 		#Authenticate when opened first time
 		self.showSettings()
-		self.timer.start(30000)
 		
 	def icon_triggerd(self,reason):
 	    #print 'dasdasdas'
@@ -618,28 +493,6 @@ class Ui_Zwit(object):
 		about.setupUi(dialog)
 		dialog.show()
 		dialog.exec_()
-		
-#########################
-#Update List Widget Every 60 seconds
-#########################
-
-	def showUpdate(self):
-	    global MESSAGE_FLAG
-	    global PUBLIC_FLAG
-	    global REPLY_FLAG
-	    
-	    if MESSAGE_FLAG == 0 and PUBLIC_FLAG==0:
-		self.timer.start(30000)
-		if REPLY_FLAG ==1:
-		    self.showReplies()
-		else:
-		    self.showMessage()
-	    if MESSAGE_FLAG == 1 and PUBLIC_FLAG ==0:
-		self.timer.start(30000)
-		self.showDirectMessage()
-	    if MESSAGE_FLAG == 0 and PUBLIC_FLAG == 1:
-		self.timer.start(30000)
-		self.publicStatus()
 		
 #########################
 #Post New Status
@@ -757,19 +610,14 @@ class Ui_Zwit(object):
 		global OWN_STATUS
 		global API
 		global REPLIES
-		global ERROR
-		global Thread_Flag
+		
 		try:
-		    Thread_Flag=0
-		    busy = showBusy()
-		    busy.start()
-		    busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
-		    QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
-		    busyd.exec_()
-		    
-		    if ERROR != None:
-			error = QMessageBox(3,"Error",str(ERROR))
-			error.show()
+		    busy = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
+		    busy.exec_()
+		    API = twitter.Api(username=USER,password = PASSWORD)
+		    REPLIES = API.GetReplies()
+		    FRIENDS = API.GetFriends()
+		    busy.hide()
 		except twitter.TwitterError as eror:
 		    error = QErrorMessage()
 		    error.showMessage(eror.message)
@@ -792,20 +640,18 @@ class Ui_Zwit(object):
 	    global STATUS
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
-	    global Thread_Flag
+	    
 	    MESSAGE_FLAG = 0
 	    PUBLIC_FLAG = 0
-	    REPLY_FLAG = 0
+	    
 	    try:
-		print 'showMessage'
-		Thread_Flag=1
-		busy = showBusy()
-		busy.start()
-		busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
-		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
-		busyd.exec_()
-		
+		#print 'showMessage Called'
 		self.listWidget.clear()
+		#busy = QMessageBox(1,"Busy","Please Wait..API downloading your DATA")
+		#busy.show()
+		
+		STATUS = API.GetFriendsTimeline() 
+		#busy.hide()
 		i = 0
 		temp = len(STATUS)
 		
@@ -824,7 +670,10 @@ class Ui_Zwit(object):
 			print name[1]
 			if name[1] == 'gif':
 			    icon_name[1] = name[0]+'.png'
-			
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+		        
+		    #print friend.GetScreenName()
 		    name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
 		    size = QSize(48,48)
 		    self.listWidget.setIconSize(size)
@@ -862,22 +711,14 @@ class Ui_Zwit(object):
 	    global API
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
-	    global Thread_Flag
 	    
 	    PUBLIC_FLAG =1
 	    MESSAGE_FLAG = 0
 	    
 	    try:
 		
-		Thread_Flag = 2
-		busy = showBusy()
-		busy.start()
-		busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
-		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
-		busyd.exec_()
-		
+		PUBLIC_MESAGE = API.GetPublicTimeline()
 		self.listWidget.clear()
-		print type(PUBLIC_MESAGE)
 		for s in PUBLIC_MESAGE:
 		    
 		    friend = s.GetUser()
@@ -932,6 +773,8 @@ class Ui_Zwit(object):
 		ui.setupUi(Dialog)
 		Dialog.show()
 		Dialog.exec_()
+		time = Timer(30.0,self.showMessage(),self)
+		time.start()
 	    else:
 		self.postNew(toSpecific)
 		
@@ -954,15 +797,8 @@ class Ui_Zwit(object):
 	    global API
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
-	    global Thread_Flag
 	    
-	    Thread_Flag = 3
-	    busy = showBusy()
-	    busy.start()
-	    busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
-	    QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
-	    busyd.exec_()
-	    
+	    MESSAGES = API.GetDirectMessages()
 	    self.listWidget.clear()
 	    for m in MESSAGES:
 		MESSAGE_FLAG = 1
@@ -985,7 +821,9 @@ class Ui_Zwit(object):
 		    print name[1]
 		    if name[1] == 'gif':
 			icon_name[1] = name[0]+'.png'
-		
+		    url.retrieve(icon_url,icon_name[1])
+		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+			
 		size = QSize(48,48)
 		self.listWidget.setIconSize(size)
 		    #print friend.GetScreenName()
@@ -1003,24 +841,14 @@ class Ui_Zwit(object):
 	    global API
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
-	    global REPLY_FLAG
-	    global Thread_Flag
 	    
 	    try:
-		Thread_Flag = 4
-		
-		busy = showBusy()
-		busy.start()
-		busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
-		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
-		busyd.exec_()
-		
 		MESSAGE_FLAG = 0
 		PUBLIC_FLAG = 0
-		REPLY_FLAG =1
+		
 		self.listWidget.clear()
 		for s in REPLIES:
-		    print 'reply reached'
+		    
 		    friend = s.GetUser()
 		    a = QtCore.QString()
 		    a = friend.GetScreenName()
@@ -1031,11 +859,9 @@ class Ui_Zwit(object):
 		    icon_name = icon_url.rsplit('/',1)
 		    url = urllib.URLopener()
 		    if not os.path.isfile("../profile_images/"+icon_name[1]):
-			name = icon_name[1].rsplit('.',1)
-			print name[1]
-			if name[1] == 'gif':
-			    icon_name[1] = name[0]+'.png'
-			    
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+			
 		    size = QSize(48,48)
 		    self.listWidget.setIconSize(size)
 		    #print friend.GetScreenName()
