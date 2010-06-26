@@ -1,0 +1,48 @@
+Welcome to Zwitter
+=======================
+
+NOTE:
+--------
+The following Application has nothing to do with HeRMAPHRODITE or German Band RAMMSTEIN, as some of you would link to by reading the name.
+The name is just a fusion of my nick Zarthon + Twitter = Zwitter.  :P
+
+Introduction
+=============
+
+Special Thanks to DeWitt Clinton for developing such a wonderfull library for Twitter in python
+
+Zwitter is just a simple GUI frontend for twitter API created using tools:
+    Python
+    QtDesigner
+    PyQt4
+    pyuic4
+    Twitter library for python (http://code.google.com/p/python-twitter)
+    
+Zwitter is basically result of me wanting to learn PyQt4 bindings and my liking towards Twitter.
+
+Zwitter has  all the major functionalities of a standard Twitter API such as:
+    
+    Display Latest Messages on Twitter
+    Latest Messages of Friends
+    Add Friend, Destroy Friendship
+    Post Status, Delete Status, Retweet etc.
+    Get Replies, Post Replies
+    Get Direct Messages and Send Direct Messages
+
+Limitations
+===========
+
+Zwitter has some limitations though:
+    
+    In post New Message only one line is displayed.
+    When Status is too small then in main Widget it s shown after User ScreenName
+    As profile images are downloaded, profile_images folder becomes heavy and can occupy significant amount of space
+    Sometimes Even though an eror is shown, but the function gets completed succesfully
+    It Takes some time for the app to show main dialog as it loads the data of the Twitter user specified by the EndUser
+    You have to enter Username and Password Everytime you restart the application
+
+
+Licensing
+===========
+
+Zwitter is Open Source software under the GNU General Public License. See LICENSE for details.
