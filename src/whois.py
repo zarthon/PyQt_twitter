@@ -19,7 +19,7 @@ class Ui_whoIs(object):
     def setupUi(self, Dialog,User):
         Dialog.setObjectName("Dialog")
         Dialog.setFixedSize(325, 227)
-        Dialog.setWindowIcon(QtGui.QIcon('icons/web48.png'))
+        Dialog.setWindowIcon(QtGui.QIcon('../icons/web48.png'))
         
         self.verticalLayout_2 = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -39,12 +39,17 @@ class Ui_whoIs(object):
         icon_url = User.GetProfileImageUrl()
 	#print icon_url
 	icon_name = icon_url.rsplit('/',1)
+	filena = "../profile_images/"+icon_name[1]
 	url = urllib.URLopener()
-	if not os.path.isfile("./profile_images/"+icon_name[1]):
+	if not os.path.isfile("../profile_images/"+icon_name[1]):
+	    name = icon_name[1].rsplit('.',1)
+	    print name[1]
+	    if name[1] == 'gif':
+		icon_name[1] = name[0]+'.png'
 	    url.retrieve(icon_url,icon_name[1])
-	    shutil.move(icon_name[1],"./profile_images/"+icon_name[1])
-
-        self.label_9.setPixmap(QtGui.QPixmap("./profile_images/"+icon_name[1]))
+	    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+			
+        self.label_9.setPixmap(QtGui.QPixmap("../profile_images/"+icon_name[1]))
         self.label_9.setObjectName("label_9")
         self.horizontalLayout.addWidget(self.label_9)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
