@@ -65,6 +65,7 @@ class showBusy(QThread):
 	global USER
 	global PASSWORD
 	global STATUS
+	global FRIENDS
 	global REPLIES
 	global MESSAGES
 	global PUBLIC_MESAGE
