@@ -7,10 +7,25 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import *
+import sys
+import twitter
+import traceback
+from PyQt4 import QtGui
+from threading import Timer
+import thread, threading
+from PyQt4 import QtCore
 from PyQt4.QtCore import *
-#from pyQt4 import Qt
+from PyQt4.QtGui import *
+import urllib2, urllib
+import os.path
+import shutil
+
+from about import *
+from direct import *
+from reply import *
+from settings import *
+import config
+
 
 import sys
 import urllib, urllib2

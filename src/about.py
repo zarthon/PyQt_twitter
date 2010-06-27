@@ -7,8 +7,26 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+
 import sys
+import twitter
+import traceback
+from PyQt4 import QtGui
+from threading import Timer
+import thread, threading
+from PyQt4 import QtCore
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+import urllib2, urllib
+import os.path
+import shutil
+from whois import *
+
+from direct import *
+from reply import *
+from settings import *
+import config
+
 
 class Ui_About(object):
     def setupUi(self, Dialog):
