@@ -40,7 +40,20 @@ Zwitter has some limitations though:
     Sometimes Even though an eror is shown, but the function gets completed succesfully
     It Takes some time for the app to show main dialog as it loads the data of the Twitter user specified by the EndUser
     You have to enter Username and Password Everytime you restart the application
+    
+    
+How To Use
+===========
 
+1. Firstly to be able to use this you need to download the twiiter module for python from http://code.google.com/p/python-twitter
+
+2. If there is no folder named profile_images in the the main folder, then create one, otherwiser App wpnt be able to save the profile images of the user
+
+3. To execute the app just run ./exec.sh from the terminal and app should start normally
+
+4. If something bad happens, please mail the error or bug to AUTHORS. See AUTHORS for Details
+
+5. It updates your current listWidget contents every 60 seconds
 
 Licensing
 ===========

@@ -52,6 +52,11 @@ ERROR =None
 
 Thread_Flag = -1
 #0 for authenticate, 1 for showMessage, 2 for publicStatus, 3 for DirectMesssage, 4 for GetReplies
+
+############################################################################
+#Function to execute Functions while GUI thread display Infinite Progress BAR 
+############################################################################
+
 class showBusy(QThread):
     def __init__(self,parent=None):
 	QtCore.QThread.__init__(self,parent)
@@ -64,102 +69,146 @@ class showBusy(QThread):
 	global MESSAGES
 	global PUBLIC_MESAGE
 	global Thread_Flag
+	global ERROR
 	
-	print 'thread running'
+	#print 'thread running'
 	print Thread_Flag
 	if Thread_Flag == 0:
-	    API = twitter.Api(username=USER,password = PASSWORD)
-	    FRIENDS = API.GetFriends()
+	    try:
+		ERROR = None
+		API = twitter.Api(username=USER,password = PASSWORD)
+		FRIENDS = API.GetFriends()
+	    except twitter.TwitterError as eror:
+		ERROR = str(eror.message)
+		print ERROR
+	    except urllib2.HTTPError as eror:
+		ERROR = str(eror)
+		print ERROR
+	    except urllib2.URLError as eror:
+		ERROR = str(eror)
+		print ERROR
+		
 	    Thread_Flag = -1
 	if Thread_Flag == 1:
-	    print 'falg 1 reached'
-	    
-	    STATUS = API.GetFriendsTimeline() 
-		#busy.hide()
-	    i = 0
-	    temp = len(STATUS)
+	  #  print 'falg 1 reached'
+	    try:
+		ERROR = None
+		STATUS = API.GetFriendsTimeline() 
+		    #busy.hide()
+		i = 0
+		temp = len(STATUS)
+		    
+		for i in range(0,temp):
 		
-	    for i in range(0,temp):
-	    
-		s = STATUS[i]
-		friend = s.GetUser()
-	    
-		icon_url = friend.GetProfileImageUrl()
-		#print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		if not os.path.isfile("../profile_images/"+icon_name[1]):
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
-	    
+		    s = STATUS[i]
+		    friend = s.GetUser()
+		
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    filena = "../profile_images/"+icon_name[1]
+		    url = urllib.URLopener()
+		    if not os.path.isfile("../profile_images/"+icon_name[1]):
+			name = icon_name[1].rsplit('.',1)
+			#print name[1]
+			if name[1] == 'gif':
+			    icon_name[1] = name[0]+'.png'
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    except twitter.TwitterError as eror:
+		ERROR = str(eror.message)
+	    except urllib2.HTTPError as eror:
+		ERROR = str(eror)
+	    except urllib2.URLError as eror:
+		ERROR = str(eror)
 	    Thread_Flag = -1
 	    
 	if Thread_Flag == 2:
-	    PUBLIC_MESAGE = API.GetPublicTimeline()
-	    
-	    for s in PUBLIC_MESAGE:
-		friend = s.GetUser()
-		   
-		icon_url = friend.GetProfileImageUrl()
-		#print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		if not os.path.isfile("../profile_images/"+icon_name[1]):
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    try:
+		ERROR = None
+		PUBLIC_MESAGE = API.GetPublicTimeline()
+		
+		for s in PUBLIC_MESAGE:
+		    friend = s.GetUser()
+		    
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    filena = "../profile_images/"+icon_name[1]
+		    url = urllib.URLopener()
+		    if not os.path.isfile("../profile_images/"+icon_name[1]):
+			name = icon_name[1].rsplit('.',1)
+			#print name[1]
+			if name[1] == 'gif':
+			    icon_name[1] = name[0]+'.png'
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    except twitter.TwitterError as eror:
+		ERROR = str(eror.message)
+	    except urllib2.HTTPError as eror:
+		ERROR = str(eror)
+	    except urllib2.URLError as eror:
+		ERROR = str(eror)
+		
 	    Threa_Flag =-1
 	    
 	if Thread_Flag == 3:
-	    MESSAGES = API.GetDirectMessages()
-	    for m in MESSAGES:
-		sender_id = m.GetSenderId()
-		sender_user = API.GetUser(sender_id)
+	    try:
+		ERROR = None
+		MESSAGES = API.GetDirectMessages()
+		for m in MESSAGES:
+		    sender_id = m.GetSenderId()
+		    sender_user = API.GetUser(sender_id)
 
-		icon_url = sender_user.GetProfileImageUrl()
-		print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		print "../profile_images/"+icon_name[1]
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		print os.path.isfile(filena)
-		if os.path.isfile(filena) == False:
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+		    icon_url = sender_user.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    print "../profile_images/"+icon_name[1]
+		    filena = "../profile_images/"+icon_name[1]
+		    url = urllib.URLopener()
+		    print os.path.isfile(filena)
+		    if os.path.isfile(filena) == False:
+			name = icon_name[1].rsplit('.',1)
+			#print name[1]
+			if name[1] == 'gif':
+			    icon_name[1] = name[0]+'.png'
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    except twitter.TwitterError as eror:
+		ERROR = str(eror.message)
+	    except urllib2.HTTPError as eror:
+		ERROR = str(eror)
+	    except urllib2.URLError as eror:
+		ERROR = str(eror)
 	    Thread_Flag = -1
 	    
 	if Thread_Flag ==4:
-	    REPLIES = API.GetReplies()
-	    for m in REPLIES:
-		friend = m.GetUser()
-		
-		icon_url = friend.GetProfileImageUrl()
-		print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		print "../profile_images/"+icon_name[1]
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		print os.path.isfile(filena)
-		if os.path.isfile(filena) == False:
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		    url.retrieve(icon_url,icon_name[1])
-		    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    try:
+		ERROR = None
+		REPLIES = API.GetReplies()
+		for m in REPLIES:
+		    friend = m.GetUser()
+		    
+		    icon_url = friend.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    print "../profile_images/"+icon_name[1]
+		    filena = "../profile_images/"+icon_name[1]
+		    url = urllib.URLopener()
+		    print os.path.isfile(filena)
+		    if os.path.isfile(filena) == False:
+			name = icon_name[1].rsplit('.',1)
+			#print name[1]
+			if name[1] == 'gif':
+			    icon_name[1] = name[0]+'.png'
+			url.retrieve(icon_url,icon_name[1])
+			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+	    except twitter.TwitterError as eror:
+		ERROR = str(eror.message)
+	    except urllib2.HTTPError as eror:
+		ERROR = str(eror)
+	    except urllib2.URLError as eror:
+		ERROR = str(eror)
 	    Thread_Flag = -1
 	    
 ###################################################
@@ -237,8 +286,8 @@ class Ui_Direct(object):
 	   
 	try:
 	    user = str(self.comboBox.currentText())
-	    print text
-	    print user
+	    #print text
+	    #print user
 	    API.PostDirectMessage(user,text)
 	except twitter.TwitterError as eror:
 	    error = QErrorMessage()
@@ -366,7 +415,7 @@ class Ui_Reply(object):
 	global API
 	
 	post_string = self.lineEdit_2.displayText()
-	print post_string
+	#print post_string
 	
 	if post_string.size() > 140:
 	    post_string = post_string[:140]
@@ -589,7 +638,7 @@ class Ui_Zwit(object):
 		
 		#Authenticate when opened first time
 		self.showSettings()
-		self.timer.start(30000)
+		self.timer.start(60000)
 		
 	def icon_triggerd(self,reason):
 	    #print 'dasdasdas'
@@ -619,9 +668,9 @@ class Ui_Zwit(object):
 		dialog.show()
 		dialog.exec_()
 		
-#########################
+###################################
 #Update List Widget Every 60 seconds
-#########################
+###################################
 
 	def showUpdate(self):
 	    global MESSAGE_FLAG
@@ -629,16 +678,16 @@ class Ui_Zwit(object):
 	    global REPLY_FLAG
 	    
 	    if MESSAGE_FLAG == 0 and PUBLIC_FLAG==0:
-		self.timer.start(30000)
+		self.timer.start(60000)
 		if REPLY_FLAG ==1:
 		    self.showReplies()
 		else:
 		    self.showMessage()
 	    if MESSAGE_FLAG == 1 and PUBLIC_FLAG ==0:
-		self.timer.start(30000)
+		self.timer.start(60000)
 		self.showDirectMessage()
 	    if MESSAGE_FLAG == 0 and PUBLIC_FLAG == 1:
-		self.timer.start(30000)
+		self.timer.start(60000)
 		self.publicStatus()
 		
 #########################
@@ -662,10 +711,10 @@ class Ui_Zwit(object):
 		    if temp.size() > 140:
 			temp = temp.remove(140,9999999)
 			status = str(temp)
-			print temp
+			#print temp
 			
 		    try:
-			print status
+			#print status
 			API.PostUpdates(status)
 			
 		    except twitter.TwitterError as eror:
@@ -694,11 +743,11 @@ class Ui_Zwit(object):
 		    if temp.size() > 140:
 			temp = temp.remove(140,9999999)
 			status = str(temp)
-			print temp
+			#print temp
 			
 		    try:
 			status = str(toSpecific) + ' ' + status
-			print status
+			#print status
 			API.PostUpdates(status)
 			
 		    except twitter.TwitterError as eror:
@@ -770,6 +819,7 @@ class Ui_Zwit(object):
 		    if ERROR != None:
 			error = QMessageBox(3,"Error",str(ERROR))
 			error.show()
+			error.exec_()
 		except twitter.TwitterError as eror:
 		    error = QErrorMessage()
 		    error.showMessage(eror.message)
@@ -793,11 +843,14 @@ class Ui_Zwit(object):
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
 	    global Thread_Flag
+	    global ERROR
+	    global REPLY_FLAG
+	    
 	    MESSAGE_FLAG = 0
 	    PUBLIC_FLAG = 0
 	    REPLY_FLAG = 0
 	    try:
-		print 'showMessage'
+		#print 'showMessage'
 		Thread_Flag=1
 		busy = showBusy()
 		busy.start()
@@ -805,38 +858,43 @@ class Ui_Zwit(object):
 		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
 		busyd.exec_()
 		
-		self.listWidget.clear()
-		i = 0
-		temp = len(STATUS)
-		
-		for i in range(0,temp):
+		if ERROR != None:
+			error = QMessageBox(3,"Error",str(ERROR))
+			error.show()
+			error.exec_()
+		else:
+		    self.listWidget.clear()
+		    i = 0
+		    temp = len(STATUS)
 		    
-		    s = STATUS[i]
-		    friend = s.GetUser()
-		    
-		    icon_url = friend.GetProfileImageUrl()
-		    #print icon_url
-		    icon_name = icon_url.rsplit('/',1)
-		    filena = "../profile_images/"+icon_name[1]
-		    url = urllib.URLopener()
-		    if not os.path.isfile("../profile_images/"+icon_name[1]):
-			name = icon_name[1].rsplit('.',1)
-			print name[1]
-			if name[1] == 'gif':
-			    icon_name[1] = name[0]+'.png'
+		    for i in range(0,temp):
 			
-		    name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
-		    size = QSize(48,48)
-		    self.listWidget.setIconSize(size)
-		    
-		    a = friend.GetScreenName()
-		    self.listWidget.addItem(a)
-		    self.listWidget.addItem(name)
-		    
-		    if s.GetFavorited() == True:
-			self.listWidget.addItem('F@\/()r!TeD-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
-		    else:
-			self.listWidget.addItem('------------------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+			s = STATUS[i]
+			friend = s.GetUser()
+			
+			icon_url = friend.GetProfileImageUrl()
+			#print icon_url
+			icon_name = icon_url.rsplit('/',1)
+			filena = "../profile_images/"+icon_name[1]
+			url = urllib.URLopener()
+			if not os.path.isfile("../profile_images/"+icon_name[1]):
+			    name = icon_name[1].rsplit('.',1)
+			    #print name[1]
+			    if name[1] == 'gif':
+				icon_name[1] = name[0]+'.png'
+			    
+			name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
+			size = QSize(48,48)
+			self.listWidget.setIconSize(size)
+			
+			a = friend.GetScreenName()
+			self.listWidget.addItem(a)
+			self.listWidget.addItem(name)
+			
+			if s.GetFavorited() == True:
+			    self.listWidget.addItem('F@\/()r!TeD-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+			else:
+			    self.listWidget.addItem('------------------------------------------------------------------------------------------------------------------------------------------------------------------\n')
 		    
 		    
 	    except twitter.TwitterError as a:
@@ -863,6 +921,7 @@ class Ui_Zwit(object):
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
 	    global Thread_Flag
+	    global ERROR
 	    
 	    PUBLIC_FLAG =1
 	    MESSAGE_FLAG = 0
@@ -876,35 +935,40 @@ class Ui_Zwit(object):
 		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
 		busyd.exec_()
 		
-		self.listWidget.clear()
-		print type(PUBLIC_MESAGE)
-		for s in PUBLIC_MESAGE:
-		    
-		    friend = s.GetUser()
-		    a = QtCore.QString()
-		    a = friend.GetScreenName()
-		    self.listWidget.addItem(a)
-		   
-		    icon_url = friend.GetProfileImageUrl()
-		    #print icon_url
-		    icon_name = icon_url.rsplit('/',1)
-		    filena = "../profile_images/"+icon_name[1]
-		    url = urllib.URLopener()
-		    if not os.path.isfile("../profile_images/"+icon_name[1]):
-			name = icon_name[1].rsplit('.',1)
-			print name[1]
-			if name[1] == 'gif':
-			    icon_name[1] = name[0]+'.png'
-			url.retrieve(icon_url,icon_name[1])
-			shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+		if ERROR != None:
+			error = QMessageBox(3,"Error",str(ERROR))
+			error.show()
+			error.exec_()
+		else:
+		    self.listWidget.clear()
+		    #print type(PUBLIC_MESAGE)
+		    for s in PUBLIC_MESAGE:
 			
-		    size = QSize(48,48)
-		    self.listWidget.setIconSize(size)
-		    #print friend.GetScreenName()
-		    name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
+			friend = s.GetUser()
+			a = QtCore.QString()
+			a = friend.GetScreenName()
+			self.listWidget.addItem(a)
 		    
-		    self.listWidget.addItem(name)
-		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+			icon_url = friend.GetProfileImageUrl()
+			#print icon_url
+			icon_name = icon_url.rsplit('/',1)
+			filena = "../profile_images/"+icon_name[1]
+			url = urllib.URLopener()
+			if not os.path.isfile("../profile_images/"+icon_name[1]):
+			    name = icon_name[1].rsplit('.',1)
+			    #print name[1]
+			    if name[1] == 'gif':
+				icon_name[1] = name[0]+'.png'
+			    url.retrieve(icon_url,icon_name[1])
+			    shutil.move(icon_name[1],"../profile_images/"+icon_name[1])
+			    
+			size = QSize(48,48)
+			self.listWidget.setIconSize(size)
+			#print friend.GetScreenName()
+			name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
+			
+			self.listWidget.addItem(name)
+			self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
 	    except twitter.TwitterError as a:
 		eror=QErrorMessage()
 		eror.showMessage(a.message)
@@ -955,6 +1019,7 @@ class Ui_Zwit(object):
 	    global MESSAGE_FLAG
 	    global PUBLIC_FLAG
 	    global Thread_Flag
+	    global ERROR
 	    
 	    Thread_Flag = 3
 	    busy = showBusy()
@@ -963,36 +1028,53 @@ class Ui_Zwit(object):
 	    QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
 	    busyd.exec_()
 	    
-	    self.listWidget.clear()
-	    for m in MESSAGES:
-		MESSAGE_FLAG = 1
-		PUBLIC_FLAG =0
-		sender_id = m.GetSenderId()
-		sender_user = API.GetUser(sender_id)
-		
-		a = sender_user.GetScreenName()
-		self.listWidget.addItem(a)
-
-		icon_url = sender_user.GetProfileImageUrl()
-		print icon_url
-		icon_name = icon_url.rsplit('/',1)
-		print "../profile_images/"+icon_name[1]
-		filena = "../profile_images/"+icon_name[1]
-		url = urllib.URLopener()
-		print os.path.isfile(filena)
-		if os.path.isfile(filena) == False:
-		    name = icon_name[1].rsplit('.',1)
-		    print name[1]
-		    if name[1] == 'gif':
-			icon_name[1] = name[0]+'.png'
-		
-		size = QSize(48,48)
-		self.listWidget.setIconSize(size)
-		    #print friend.GetScreenName()
-		name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),m.GetText())
+	    if ERROR != None:
+			error = QMessageBox(3,"Error",str(ERROR))
+			error.show()
+			error.exec_()
+	    try:
+		self.listWidget.clear()
+		for m in MESSAGES:
+		    MESSAGE_FLAG = 1
+		    PUBLIC_FLAG =0
+		    sender_id = m.GetSenderId()
+		    sender_user = API.GetUser(sender_id)
 		    
-		self.listWidget.addItem(name)
-		self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+		    a = sender_user.GetScreenName()
+		    self.listWidget.addItem(a)
+
+		    icon_url = sender_user.GetProfileImageUrl()
+		    #print icon_url
+		    icon_name = icon_url.rsplit('/',1)
+		    print "../profile_images/"+icon_name[1]
+		    filena = "../profile_images/"+icon_name[1]
+		    url = urllib.URLopener()
+		    print os.path.isfile(filena)
+		    if os.path.isfile(filena) == False:
+			name = icon_name[1].rsplit('.',1)
+			#print name[1]
+			if name[1] == 'gif':
+			    icon_name[1] = name[0]+'.png'
+		    
+		    size = QSize(48,48)
+		    self.listWidget.setIconSize(size)
+			#print friend.GetScreenName()
+		    name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),m.GetText())
+			
+		    self.listWidget.addItem(name)
+		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+	    except twitter.TwitterError as a:
+		eror=QErrorMessage()
+		eror.showMessage(a.message)
+		eror.exec_()
+	    except urllib2.HTTPError as eror:
+		error = QMessageBox(3,"Error",str(eror))
+		error.show()
+		error.exec_()
+	    except urllib2.URLError as eror:
+		error = QMessageBox(3,"Error",str(eror))
+		error.show()
+		error.exec_()
 		
 #######################################################
 #Show Replies to authenticated user through showMessage
@@ -1005,6 +1087,7 @@ class Ui_Zwit(object):
 	    global PUBLIC_FLAG
 	    global REPLY_FLAG
 	    global Thread_Flag
+	    global ERROR
 	    
 	    try:
 		Thread_Flag = 4
@@ -1014,35 +1097,39 @@ class Ui_Zwit(object):
 		busyd = QProgressDialog("Please Wait..API downloading your DATA",QString(),0,0)
 		QtCore.QObject.connect(busy,QtCore.SIGNAL("finished()"), busyd,QtCore.SLOT("hide()"))
 		busyd.exec_()
-		
-		MESSAGE_FLAG = 0
-		PUBLIC_FLAG = 0
-		REPLY_FLAG =1
-		self.listWidget.clear()
-		for s in REPLIES:
-		    print 'reply reached'
-		    friend = s.GetUser()
-		    a = QtCore.QString()
-		    a = friend.GetScreenName()
-		    self.listWidget.addItem(a)
-		    
-		    icon_url = friend.GetProfileImageUrl()
-		    #print icon_url
-		    icon_name = icon_url.rsplit('/',1)
-		    url = urllib.URLopener()
-		    if not os.path.isfile("../profile_images/"+icon_name[1]):
-			name = icon_name[1].rsplit('.',1)
-			print name[1]
-			if name[1] == 'gif':
-			    icon_name[1] = name[0]+'.png'
-			    
-		    size = QSize(48,48)
-		    self.listWidget.setIconSize(size)
-		    #print friend.GetScreenName()
-		    name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
-		    
-		    self.listWidget.addItem(name)
-		    self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
+		if ERROR != None:
+		    error = QMessageBox(3,"Error",str(ERROR))
+		    error.show()
+		    error.exec_()
+		else:
+		    MESSAGE_FLAG = 0
+		    PUBLIC_FLAG = 0
+		    REPLY_FLAG =1
+		    self.listWidget.clear()
+		    for s in REPLIES:
+			#print 'reply reached'
+			friend = s.GetUser()
+			a = QtCore.QString()
+			a = friend.GetScreenName()
+			self.listWidget.addItem(a)
+			
+			icon_url = friend.GetProfileImageUrl()
+			#print icon_url
+			icon_name = icon_url.rsplit('/',1)
+			url = urllib.URLopener()
+			if not os.path.isfile("../profile_images/"+icon_name[1]):
+			    name = icon_name[1].rsplit('.',1)
+			    #print name[1]
+			    if name[1] == 'gif':
+				icon_name[1] = name[0]+'.png'
+				
+			size = QSize(48,48)
+			self.listWidget.setIconSize(size)
+			#print friend.GetScreenName()
+			name = QListWidgetItem(QIcon(QString("../profile_images/"+icon_name[1])),s.GetText())
+			
+			self.listWidget.addItem(name)
+			self.listWidget.addItem('-------------------------------------------------------------------------------------------------------------------------------------------------------\n')
 		    
 	    except twitter.TwitterError as a:
 		eror=QErrorMessage()
@@ -1169,9 +1256,9 @@ class Ui_Zwit(object):
 				self.listWidget.takeItem(row)
 				self.listWidget.takeItem(row)
 				self.listWidget.takeItem(row)
-				print len(STATUS)
+				#print len(STATUS)
 				del STATUS[index]
-				print len(STATUS)
+				#print len(STATUS)
 			    except twitter.TwitterError as eror:
 				error = QErrorMessage()
 				error.showMessage(eror.message)
@@ -1197,7 +1284,7 @@ class Ui_Zwit(object):
 			    item = PUBLIC_MESAGE[index].GetUser()
 			item_id = item.GetId()
 			user = API.GetUser(item_id)
-			print user.GetStatus()
+			#print user.GetStatus()
 			self.showWhoIs(user)
 			
 		if (flag-1)%3 == 0:
@@ -1206,8 +1293,8 @@ class Ui_Zwit(object):
 		    
 		    fav_index = (flag-1)/3
 		    fav_status = STATUS[fav_index]
-		    print fav_status.GetText()
-		    print fav_status
+		    #print fav_status.GetText()
+		    #print fav_status
 		    if fav_status.GetFavorited() == False:
 			favorite = menu.addAction(QtGui.QIcon("../icons/favorite.png"),"Favorite")
 		    else:
@@ -1273,7 +1360,7 @@ class Ui_Zwit(object):
 		cursor = QCursor()
 		menu = QtGui.QMenu()
 		flag = self.listWidget.currentRow()
-		print flag
+		#print flag
 		if flag%3==0 or (flag-1)%3 == 0:
 		    reply = menu.addAction(QtGui.QIcon("../icons/reply.png"),"Reply")
 		    delete = menu.addAction(QtGui.QIcon("../icons/delete.png"),"Delete")
@@ -1312,7 +1399,7 @@ class Ui_Zwit(object):
 
 			if reply == QtGui.QMessageBox.Yes:
 			    try:
-				print id_del
+				#print id_del
 				row = self.listWidget.currentRow()
 				API.DestroyDirectMessage(id_del)
 				self.listWidget.takeItem(row)
