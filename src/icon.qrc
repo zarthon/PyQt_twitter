@@ -1,0 +1,17 @@
+<!DOCTYPE RCC><RCC>
+  <qresource>
+    <file>icons/about.png</file>
+    <file>icons/befriends.png</file>
+    <file>icons/close.png</file>
+    <file>icons/delete.png</file>
+    <file>icons/favorite.png</file>
+    <file>icons/get_mesg.png</file>
+    <file>icons/logo.png</file>
+    <file>icons/new.png</file>
+    <file>icons/reply.png</file>
+    <file>icons/retweet.png</file>
+    <file>icons/settings.png</file>
+    <file>icons/web48.png</file>
+    <file>icons/whois.png</file>
+  </qresource>
+</RCC>
