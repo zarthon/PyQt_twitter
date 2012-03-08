@@ -36,7 +36,7 @@ from direct import *
 from reply import *
 from settings import *
 import config
-
+import qr_icon
 
 
 
@@ -201,9 +201,9 @@ class Ui_Zwit(object):
 	def setupUi(self, Dialog):
 		Dialog.setObjectName("Dialog")
 		Dialog.resize(430, 584)
-		self.systemTray = QSystemTrayIcon(QtGui.QIcon('../icons/web48.png'),None)
+		self.systemTray = QSystemTrayIcon(QtGui.QIcon(':/icons/web48.png'),None)
 		self.systemTray.setVisible(True)
-		Dialog.setWindowIcon(QtGui.QIcon('../icons/web48.png'))
+		Dialog.setWindowIcon(QtGui.QIcon(':/icons/web48.png'))
 		
 		self.verticalLayout_3 = QtGui.QVBoxLayout(Dialog)
 		self.verticalLayout_3.setObjectName("verticalLayout_3")
@@ -218,7 +218,7 @@ class Ui_Zwit(object):
 		self.toolButton = QtGui.QToolButton(Dialog)
 		self.toolButton.setToolTip("Set UserName and Password")
 		icon = QtGui.QIcon()
-		icon.addPixmap(QtGui.QPixmap("../icons/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		icon.addPixmap(QtGui.QPixmap(":/icons/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 		self.toolButton.setIcon(icon)
 		self.toolButton.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton.setObjectName("toolButton")
@@ -226,7 +226,7 @@ class Ui_Zwit(object):
 		self.toolButton_2 = QtGui.QToolButton(Dialog)
 		self.toolButton_2.setToolTip("Post New Status")
 		icon1 = QtGui.QIcon()
-		icon1.addPixmap(QtGui.QPixmap("../icons/new.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		icon1.addPixmap(QtGui.QPixmap(":/icons/new.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 		self.toolButton_2.setIcon(icon1)
 		self.toolButton_2.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_2.setObjectName("toolButton_2")
@@ -234,7 +234,7 @@ class Ui_Zwit(object):
 		self.toolButton_5 = QtGui.QToolButton(Dialog)
 		self.toolButton_5.setToolTip("Get Friends Latest Updates")
 		icon2 = QtGui.QIcon()
-		icon2.addPixmap(QtGui.QPixmap("../icons/get_mesg.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		icon2.addPixmap(QtGui.QPixmap(":/icons/get_mesg.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 		self.toolButton_5.setIcon(icon2)
 		self.toolButton_5.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_5.setObjectName("toolButton_5")
@@ -244,7 +244,7 @@ class Ui_Zwit(object):
 		self.toolButton_3 = QtGui.QToolButton(Dialog)
 		self.toolButton_3.setToolTip("Quit")
 		icon3 = QtGui.QIcon()
-		icon3.addPixmap(QtGui.QPixmap("../icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		icon3.addPixmap(QtGui.QPixmap(":/icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 		self.toolButton_3.setIcon(icon3)
 		self.toolButton_3.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_3.setObjectName("toolButton_3")
@@ -252,7 +252,7 @@ class Ui_Zwit(object):
 		self.toolButton_4 = QtGui.QToolButton(Dialog)
 		self.toolButton_4.setToolTip("About")
 		icon4 = QtGui.QIcon()
-		icon4.addPixmap(QtGui.QPixmap("../icons/about.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		icon4.addPixmap(QtGui.QPixmap(":/icons/about.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 		self.toolButton_4.setIcon(icon4)
 		self.toolButton_4.setIconSize(QtCore.QSize(48, 48))
 		self.toolButton_4.setObjectName("toolButton_4")
@@ -301,8 +301,8 @@ class Ui_Zwit(object):
 		#contextmenu for system tray
 		
 		self.systemTrayMenu = QMenu()
-		self.postnew = self.systemTrayMenu.addAction(QtGui.QIcon('../icons/new.png'),'New Post')
-		self.quitAction = self.systemTrayMenu.addAction(QtGui.QIcon('../icons/close.png'),"Quit")
+		self.postnew = self.systemTrayMenu.addAction(QtGui.QIcon(':/icons/new.png'),'New Post')
+		self.quitAction = self.systemTrayMenu.addAction(QtGui.QIcon(':/icons/close.png'),"Quit")
 		self.postnew.triggered.connect(self.New)
 		self.quitAction.triggered.connect(quit)
 		self.systemTray.setContextMenu(self.systemTrayMenu)
@@ -823,9 +823,9 @@ class Ui_Zwit(object):
 	    
 	    if config.MESSAGE_FLAG == 0 or config.PUBLIC_FLAG ==1:
 		if (flag)%3 == 0:
-		    retweet = menu.addAction(QtGui.QIcon("../icons/retweet.png"),"ReTweet")
-		    reply = menu.addAction(QtGui.QIcon("../icons/reply.png"), "Reply")
-		    whoIs = menu.addAction(QtGui.QIcon("../icons/whois.png"), "Who Is?")
+		    retweet = menu.addAction(QtGui.QIcon(":/icons/retweet.png"),"ReTweet")
+		    reply = menu.addAction(QtGui.QIcon(":/icons/reply.png"), "Reply")
+		    whoIs = menu.addAction(QtGui.QIcon(":/icons/whois.png"), "Who Is?")
 		    sep_action = QAction(None)
 		    sep_action.setSeparator(True)
 		    sep = menu.addAction(sep_action)
@@ -833,14 +833,14 @@ class Ui_Zwit(object):
 		    friend_item = self.listWidget.currentItem()
 		    
 		    if friend_item.text() == 'zarthon':
-			delete = menu.addAction(QtGui.QIcon("../icons/delete.png"),"Delete")
+			delete = menu.addAction(QtGui.QIcon(":/icons/delete.png"),"Delete")
 		    if config.PUBLIC_FLAG == 1:
-			friendship = menu.addAction(QtGui.QIcon("../icons/befriends.png"),"Be Friend")
+			friendship = menu.addAction(QtGui.QIcon(":/icons/befriends.png"),"Be Friend")
 			
 		    if config.MESSAGE_FLAG ==0 and config.PUBLIC_FLAG ==0 and friend_item.text() != 'zarthon':
-			des_friendship = menu.addAction(QtGui.QIcon("../icons/befriends.png"),"Destroy Friendship")
+			des_friendship = menu.addAction(QtGui.QIcon(":/icons/befriends.png"),"Destroy Friendship")
 			
-		    quitAction = menu.addAction(QtGui.QIcon('../icons/close.png'),"Quit")    
+		    quitAction = menu.addAction(QtGui.QIcon(':/icons/close.png'),"Quit")    
 		    action = menu.exec_(cursor.pos())
 		
 		    if action == retweet:
@@ -944,22 +944,22 @@ class Ui_Zwit(object):
 			self.showWhoIs(user)
 			
 		if (flag-1)%3 == 0:
-		    retweet = menu.addAction(QtGui.QIcon("../icons/retweet.png"),"ReTweet")
-		    reply = menu.addAction(QtGui.QIcon("../icons/reply.png"),"Reply")
+		    retweet = menu.addAction(QtGui.QIcon(":/icons/retweet.png"),"ReTweet")
+		    reply = menu.addAction(QtGui.QIcon(":/icons/reply.png"),"Reply")
 		    
 		    fav_index = (flag-1)/3
 		    fav_status = config.STATUS[fav_index]
 		    #print fav_status.GetText()
 		    #print fav_status
 		    if fav_status.GetFavorited() == False:
-			favorite = menu.addAction(QtGui.QIcon("../icons/favorite.png"),"Favorite")
+			favorite = menu.addAction(QtGui.QIcon(":/icons/favorite.png"),"Favorite")
 		    else:
-			favorite = menu.addAction(QtGui.QIcon("../icons/favorite.png"),"Destroy Favorite")
+			favorite = menu.addAction(QtGui.QIcon(":/icons/favorite.png"),"Destroy Favorite")
 			
 		    sep_action = QAction(None)
 		    sep_action.setSeparator(True)
 		    sep = menu.addAction(sep_action)
-		    quitAction = menu.addAction(QtGui.QIcon('../icons/close.png'),"Quit")
+		    quitAction = menu.addAction(QtGui.QIcon(':/icons/close.png'),"Quit")
 		    action = menu.exec_(cursor.pos())
 		
 		    if action == retweet:
@@ -1018,13 +1018,13 @@ class Ui_Zwit(object):
 		flag = self.listWidget.currentRow()
 		#print flag
 		if flag%3==0 or (flag-1)%3 == 0:
-		    reply = menu.addAction(QtGui.QIcon("../icons/reply.png"),"Reply")
-		    delete = menu.addAction(QtGui.QIcon("../icons/delete.png"),"Delete")
+		    reply = menu.addAction(QtGui.QIcon(":/icons/reply.png"),"Reply")
+		    delete = menu.addAction(QtGui.QIcon(":/icons/delete.png"),"Delete")
 		    
 		    sep_action = QAction(None)
 		    sep_action.setSeparator(True)
 		    sep = menu.addAction(sep_action)
-		    quitAction = menu.addAction(QtGui.QIcon('../icons/close.png'),"Quit")
+		    quitAction = menu.addAction(QtGui.QIcon(':/icons/close.png'),"Quit")
 		    action = menu.exec_(cursor.pos())
 		    
 		    if action == quitAction:
